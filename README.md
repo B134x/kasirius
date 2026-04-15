@@ -1,29 +1,70 @@
 # 🧾 Kasir App (Mini POS System)
 
-Aplikasi kasir sederhana berbasis Laravel yang mendukung manajemen produk, transaksi penjualan, dan pencetakan struk otomatis.
+Aplikasi kasir sederhana berbasis Laravel yang mendukung manajemen produk, transaksi penjualan, hingga pencetakan struk otomatis.
 
 ---
 
 ## 🚀 Fitur Utama
 
-- 🔐 Authentication (Login, Register, Logout)
-- 📦 Manajemen Produk (CRUD)
-- 🛒 Sistem Keranjang (Cart)
-- ➕➖ Update Qty produk di kasir
-- 💰 Perhitungan Total & Kembalian otomatis
-- ⚠️ Validasi stok (tidak bisa minus)
-- 🧾 Cetak struk otomatis (print)
-- 🎨 UI sederhana & clean (Tailwind CSS)
+### 👨‍💼 Role System
+- Admin & Kasir
+- Pembatasan akses fitur berdasarkan role
+
+### 📦 Manajemen Produk
+- CRUD produk (Admin only)
+- Kategori produk
+- Pencarian & filter produk
+
+### 🛒 Sistem Kasir (POS)
+- Tambah produk ke keranjang
+- Update qty (+ / -)
+- Hapus item dari cart
+- Klik produk langsung masuk ke keranjang (UX cepat)
+
+### 💰 Transaksi
+- Perhitungan total otomatis
+- Input pembayaran
+- Hitung kembalian otomatis
+- Riwayat transaksi
+
+### 📊 Laporan
+- Export transaksi ke Excel
+- Filter:
+  - Harian
+  - Mingguan
+  - Bulanan
+  - Tahunan
+
+### 📦 Manajemen Stok
+- Stok masuk (Admin)
+- Deteksi stok habis
+- Validasi stok (tidak bisa minus)
+
+### 🧾 Struk
+- Cetak struk otomatis
+- Tampilan struk minimalis (printer ready)
+- QR Code (opsional untuk online receipt)
+
+---
+
+## 🎨 UI/UX
+
+- Tailwind CSS (clean & modern)
+- Tampilan berbeda untuk:
+  - Admin (full control)
+  - Kasir (simple & fokus transaksi)
+- Responsive layout
 
 ---
 
 ## 🧠 Teknologi yang Digunakan
 
-- Laravel (MVC Framework)
-- Blade Template Engine
-- Tailwind CSS
-- MySQL Database
-- Session-based Cart System
+- ⚙️ Laravel (MVC Framework)
+- 🧩 Blade Template Engine
+- 🎨 Tailwind CSS
+- 🗄️ MySQL Database
+- 🛒 Session-based Cart System
+- 📊 Laravel Excel (Export laporan)
 
 ---
 

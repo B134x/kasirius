@@ -92,7 +92,7 @@ Aplikasi kasir sederhana berbasis Laravel yang mendukung manajemen produk, trans
 
 ### 1. Clone Repository
 ```
-git clone https://github.com/B134x/kasirius.git
+git clone -b fitur-kasir https://github.com/B134x/kasirius.git
 cd kasirius
 ```
 ### 2. Install Dependency

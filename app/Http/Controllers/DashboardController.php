@@ -4,22 +4,41 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Transaction;
+use Illuminate\Support\Carbon;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $totalSales = Transaction::sum('total_price');
-        $totalTransactions = Transaction::count();
+        $today = Carbon::today();
+
+        // total penjualan hari ini
+        $totalSales = Transaction::whereDate('created_at', $today)->sum('total_price');
+
+        // jumlah transaksi hari ini
+        $totalTransactions = Transaction::whereDate('created_at', $today)->count();
+
+        // jumlah produk
         $totalProducts = Product::count();
 
-        $todaySales = Transaction::whereDate('created_at', today())->sum('total_price');
+        $latestTransactions = Transaction::latest()
+            ->take(5)
+            ->get();
+
+        $lowStockProducts = Product::where('stock', '<=', 10)
+            ->orderBy('stock', 'asc')
+            ->take(5)
+            ->get();
+
+        $outOfStock = Product::where('stock', 0)->count();
 
         return view('dashboard', compact(
             'totalSales',
             'totalTransactions',
             'totalProducts',
-            'todaySales'
+            'latestTransactions',
+            'lowStockProducts',
+            'outOfStock'
         ));
     }
 }

@@ -1,151 +1,140 @@
 <x-layouts.app>
-    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        <!-- PRODUK -->
-        <div>
-            <h2 class="text-xl font-semibold mb-4">Produk</h2>
+    <div class="p-6 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
 
-            <div class="space-y-2">
-                @foreach ($products as $p)
-                    <div class="flex justify-between items-center bg-white p-3 rounded-lg shadow">
+        <!-- 🔥 PRODUK -->
+        <div class="md:col-span-2">
 
-                        <div>
-                            <p class="font-medium">{{ $p->name }}</p>
-                            <p class="text-sm text-gray-500">
-                                Rp {{ number_format($p->price) }}
-                            </p>
+            <!-- SEARCH -->
+            <div class="mb-4">
+                <input type="text" id="searchProduct" placeholder="🔍 Cari produk..."
+                    class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200">
+            </div>
 
-                            @if($p->stock == 0)
-                                <p class="text-xs text-red-500">Stok Habis</p>
-                            @else
-                                <p class="text-xs text-gray-400">Stok: {{ $p->stock }}</p>
-                            @endif
-                        </div>
+            <!-- GRID PRODUK -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
 
-                        @if($p->stock > 0)
-                            <a href="{{ route('cart.add', $p->id) }}"
-                               class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
-                                +
-                            </a>
-                        @else
-                            <button disabled class="bg-gray-300 text-white px-3 py-1 rounded cursor-not-allowed">
-                                X
-                            </button>
-                        @endif
+                @foreach($products as $p)
+                    <div class="product-item bg-white p-4 rounded-xl shadow-sm border hover:shadow-lg hover:scale-[1.02] transition duration-200">
+
+                        <p class="font-semibold">{{ $p->name }}</p>
+
+                        <p class="text-sm text-gray-500">
+                            Rp {{ number_format($p->price) }}
+                        </p>
+
+                        <p class="text-xs text-gray-400">
+                            Stok: {{ $p->stock }}
+                        </p>
+
+                        <a href="{{ route('cart.add', $p->id) }}"
+                            class="mt-3 block text-center bg-blue-500 hover:bg-blue-600 text-white py-1 rounded-lg text-sm transition">
+                            + Tambah
+                        </a>
 
                     </div>
                 @endforeach
+
             </div>
+
         </div>
 
-        <!-- CART -->
-        <div>
-            <h2 class="text-xl font-semibold mb-4">Keranjang</h2>
+        <!-- 🔥 KERANJANG -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border h-fit">
+
+            <h2 class="text-lg font-semibold mb-4">Keranjang</h2>
 
             @php $total = 0; @endphp
 
-            @if(count($cart) > 0)
+            @forelse($cart as $id => $item)
 
-                <div class="space-y-2">
-                    @foreach ($cart as $id => $item)
+                @php $total += $item['price'] * $item['qty']; @endphp
 
-                        @php
-                            $subtotal = $item['price'] * $item['qty'];
-                            $total += $subtotal;
-                        @endphp
+                <div class="flex justify-between items-center mb-3 border-b pb-2">
 
-                        <div class="flex justify-between items-center bg-white p-3 rounded-lg shadow">
+                    <div>
+                        <p class="text-sm">{{ $item['name'] }}</p>
 
-                            <div>
-                                <p>{{ $item['name'] }}</p>
+                        <div class="flex gap-2 mt-1">
 
-                                <div class="flex items-center gap-2 mt-1">
-                                    <a href="{{ route('cart.decrease', $id) }}" class="px-2 bg-gray-200 rounded">-</a>
-                                    <span>{{ $item['qty'] }}</span>
-                                    <a href="{{ route('cart.increase', $id) }}" class="px-2 bg-gray-200 rounded">+</a>
-                                </div>
-                            </div>
+                            <a href="{{ route('cart.decrease', $id) }}" class="px-2 bg-gray-200 rounded">-</a>
 
-                            <div class="text-right">
-                                <p class="font-semibold">
-                                    Rp {{ number_format($subtotal) }}
-                                </p>
+                            <span>{{ $item['qty'] }}</span>
 
-                                <a href="{{ route('cart.remove', $id) }}" class="text-red-500 text-sm">Hapus</a>
-                            </div>
+                            <a href="{{ route('cart.increase', $id) }}" class="px-2 bg-gray-200 rounded">+</a>
 
                         </div>
-                    @endforeach
-                </div>
 
-                <!-- TOTAL & PAYMENT -->
-                <div class="mt-4 bg-white p-4 rounded-lg shadow">
-
-                    <div class="flex justify-between mb-2 text-lg font-semibold">
-                        <span>Total</span>
-                        <span>Rp {{ number_format($total) }}</span>
                     </div>
 
-                    @if(session('success'))
-                        <div class="bg-green-100 text-green-700 px-3 py-2 rounded mb-2">
-                            {{ session('success') }}
-                        </div>
-
-                        <div class="flex justify-between font-medium">
-                            <span>Kembalian</span>
-                            <span class="text-green-600">
-                                Rp {{ number_format(session('change')) }}
-                            </span>
-                        </div>
-                    @endif
-
-                    @if(session('error'))
-                        <div class="bg-red-100 text-red-600 px-3 py-2 rounded mb-2">
-                            {{ session('error') }}
-                        </div>
-                    @endif
-
-                    <form method="POST" action="{{ route('checkout') }}" class="mt-3">
-                        @csrf
-
-                        <label class="block text-sm mb-1">Uang Bayar</label>
-
-                        <input id="paidInput" type="number" name="paid"
-                               class="w-full border rounded px-3 py-2 mb-2 focus:outline-none focus:ring focus:border-blue-300"
-                               placeholder="Masukkan uang">
-
-                        <div class="flex justify-between mt-2 text-sm text-gray-600">
-                            <span>Kembalian (estimasi)</span>
-                            <span id="changePreview">Rp 0</span>
-                        </div>
-
-                        <button class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600">
-                            Bayar
-                        </button>
-                    </form>
+                    <p class="text-sm font-semibold">
+                        Rp {{ number_format($item['price'] * $item['qty']) }}
+                    </p>
 
                 </div>
 
-            @else
-                <p class="text-gray-500">Keranjang kosong</p>
-            @endif
+            @empty
+                <p class="text-gray-400 text-sm">Keranjang kosong</p>
+            @endforelse
+
+            <!-- TOTAL -->
+            <div class="mt-4 border-t pt-4">
+
+                <div class="flex justify-between font-semibold mb-2">
+                    <span>Total</span>
+                    <span>Rp {{ number_format($total) }}</span>
+                </div>
+
+                <!-- INPUT BAYAR -->
+                <form method="POST" action="{{ route('checkout') }}">
+                    @csrf
+
+                    <input type="number" id="paidInput" name="paid" class="w-full border rounded-lg px-3 py-2 mb-2"
+                        placeholder="Uang bayar">
+
+                    <div class="flex justify-between text-sm text-gray-500 mb-2">
+                        <span>Kembalian</span>
+                        <span id="changeText">Rp 0</span>
+                    </div>
+
+                    <button class="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg">
+                        Bayar
+                    </button>
+                </form>
+
+            </div>
 
         </div>
 
     </div>
-
-    <!-- SCRIPT -->
     <script>
+        const search = document.getElementById('searchProduct');
+        const items = document.querySelectorAll('.product-item');
+
+        search.addEventListener('keyup', function () {
+            const keyword = this.value.toLowerCase();
+
+            items.forEach(item => {
+                const text = item.innerText.toLowerCase();
+
+                if (text.includes(keyword)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
         const paidInput = document.getElementById('paidInput');
-        const changePreview = document.getElementById('changePreview');
+        const changeText = document.getElementById('changeText');
 
-        const total = {{ $total ?? 0 }};
+        const total = {{ $total }};
 
-        paidInput?.addEventListener('input', function () {
+        paidInput.addEventListener('input', function () {
             const paid = parseInt(this.value) || 0;
             const change = paid - total;
 
-            changePreview.innerText = 'Rp ' + (change > 0 ? change.toLocaleString() : 0);
+            changeText.innerText = 'Rp ' + (change > 0 ? change.toLocaleString() : 0);
         });
     </script>
 

@@ -1,35 +1,97 @@
 <x-layouts.app>
 
-<h1 class="text-2xl font-semibold mb-4">Detail Transaksi</h1>
+    <div class="p-6 max-w-5xl mx-auto">
 
-<div class="bg-white p-4 rounded-lg shadow mb-4">
-    <p>Total: Rp {{ number_format($transaction->total_price) }}</p>
-    <p>Dibayar: Rp {{ number_format($transaction->paid) }}</p>
-    <p>Kembalian: Rp {{ number_format($transaction->change) }}</p>
-</div>
+        <a href="{{ route('transactions.index') }}"
+            class="text-sm text-blue-500 hover:text-blue-700 flex items-center gap-1 mb-4">
+            <i class="fa-solid fa-arrow-left"></i>
+            Kembali ke Transaksi
+        </a>
 
-<div class="bg-white shadow rounded-lg overflow-hidden">
-<table class="w-full text-left">
-    <thead class="bg-gray-100">
-        <tr>
-            <th class="p-3">Produk</th>
-            <th class="p-3">Qty</th>
-            <th class="p-3">Harga</th>
-            <th class="p-3">Subtotal</th>
-        </tr>
-    </thead>
+        <!-- HEADER -->
+        <div class="mb-6">
+            <h1 class="text-xl font-semibold">
+                Detail Transaksi
+            </h1>
+            <p class="text-sm text-gray-500">
+                TRX{{ str_pad($transaction->id, 3, '0', STR_PAD_LEFT) }}
+            </p>
+        </div>
 
-    <tbody>
-        @foreach ($transaction->details as $d)
-        <tr class="border-t">
-            <td class="p-3">{{ $d->product->name }}</td>
-            <td class="p-3">{{ $d->qty }}</td>
-            <td class="p-3">Rp {{ number_format($d->price) }}</td>
-            <td class="p-3">Rp {{ number_format($d->price * $d->qty) }}</td>
-        </tr>
-        @endforeach
-    </tbody>
-</table>
-</div>
+        <!-- SUMMARY -->
+        <div class="bg-white rounded-xl shadow-sm border p-4 mb-6">
+
+            <div class="grid grid-cols-3 gap-4 text-sm">
+
+                <div>
+                    <p class="text-gray-500">Total</p>
+                    <p class="font-semibold text-green-600">
+                        Rp {{ number_format($transaction->total_price) }}
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-gray-500">Dibayar</p>
+                    <p class="font-semibold">
+                        Rp {{ number_format($transaction->paid) }}
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-gray-500">Kembalian</p>
+                    <p class="font-semibold text-blue-600">
+                        Rp {{ number_format($transaction->change) }}
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- TABLE -->
+        <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+
+            <table class="w-full text-sm">
+
+                <thead class="bg-gray-50 text-gray-500">
+                    <tr class="text-left">
+                        <th class="px-4 py-3">Produk</th>
+                        <th class="px-4">Qty</th>
+                        <th class="px-4">Harga</th>
+                        <th class="px-4">Subtotal</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach ($transaction->details as $d)
+                        <tr class="border-t">
+
+                            <td class="px-4 py-3 font-medium">
+                                {{ $d->product->name }}
+                            </td>
+
+                            <td class="px-4">
+                                {{ $d->qty }}
+                            </td>
+
+                            <td class="px-4">
+                                Rp {{ number_format($d->price) }}
+                            </td>
+
+                            <td class="px-4 font-semibold">
+                                Rp {{ number_format($d->price * $d->qty) }}
+                            </td>
+
+                        </tr>
+                    @endforeach
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
 
 </x-layouts.app>

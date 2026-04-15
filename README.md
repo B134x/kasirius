@@ -57,3 +57,70 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+
+# 🧾 Kasir App (Mini POS System)
+
+Aplikasi kasir sederhana berbasis Laravel yang mendukung manajemen produk, transaksi penjualan, dan pencetakan struk otomatis.
+
+---
+
+## 🚀 Fitur Utama
+
+- 🔐 Authentication (Login, Register, Logout)
+- 📦 Manajemen Produk (CRUD)
+- 🛒 Sistem Keranjang (Cart)
+- ➕➖ Update Qty produk di kasir
+- 💰 Perhitungan Total & Kembalian otomatis
+- ⚠️ Validasi stok (tidak bisa minus)
+- 🧾 Cetak struk otomatis (print)
+- 🎨 UI sederhana & clean (Tailwind CSS)
+
+---
+
+## 🧠 Teknologi yang Digunakan
+
+- Laravel (MVC Framework)
+- Blade Template Engine
+- Tailwind CSS
+- MySQL Database
+- Session-based Cart System
+
+---
+
+## ⚙️ Cara Menjalankan Project
+
+### 1. Clone Repository
+```
+git clone https://github.com/B134x/kasirius.git
+cd kasirius
+```
+### 2. Install Dependency
+```
+composer install
+npm install
+```
+### 3. Setup Environment
+```
+cp .env.example .env
+php artisan key:generate
+```
+### 4. Konfigurasi Database
+```
+DB_DATABASE=nama_database
+DB_USERNAME=root
+DB_PASSWORD=
+```
+### 5. Migrasi Database
+```
+php artisan migrate
+```
+### 6. Jalankan Aplikasi
+```
+php artisan serve
+npm run dev
+```
+### Akses di:
+```
+http://127.0.0.1:8000
+```

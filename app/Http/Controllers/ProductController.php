@@ -20,8 +20,19 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        Product::create($request->all());
-        return redirect()->route('products.index')->with('success', 'Produk ditambahkan');
+        $validated = $request->validate([
+            'name'  => ['required', 'string', 'max:255'],
+            'price' => ['required', 'integer', 'min:0'],
+            'stock' => ['required', 'integer', 'min:0'],
+        ], [
+            'name.required'  => 'Nama produk wajib diisi.',
+            'price.min'      => 'Harga tidak boleh negatif.',
+            'stock.min'      => 'Stok tidak boleh negatif.',
+        ]);
+
+        Product::create($validated);
+
+        return redirect()->route('products.index')->with('success', 'Produk berhasil ditambahkan.');
     }
 
     public function edit(Product $product)
@@ -31,13 +42,31 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
-        $product->update($request->all());
-        return redirect()->route('products.index')->with('success', 'Produk diupdate');
+        $validated = $request->validate([
+            'name'  => ['required', 'string', 'max:255'],
+            'price' => ['required', 'integer', 'min:0'],
+            'stock' => ['required', 'integer', 'min:0'],
+        ], [
+            'name.required'  => 'Nama produk wajib diisi.',
+            'price.min'      => 'Harga tidak boleh negatif.',
+            'stock.min'      => 'Stok tidak boleh negatif.',
+        ]);
+
+        $product->update($validated);
+
+        return redirect()->route('products.index')->with('success', 'Produk berhasil diupdate.');
     }
 
     public function destroy(Product $product)
     {
+        // Prevent deletion if product has transaction history
+        if ($product->transactionDetails()->count() > 0) {
+            return redirect()->route('products.index')
+                ->with('error', 'Produk tidak bisa dihapus karena memiliki riwayat transaksi.');
+        }
+
         $product->delete();
-        return redirect()->route('products.index')->with('success', 'Produk dihapus');
+
+        return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus.');
     }
 }

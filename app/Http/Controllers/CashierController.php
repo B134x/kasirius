@@ -6,26 +6,25 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
+use Illuminate\Support\Facades\Auth;
 
 class CashierController extends Controller
 {
     public function index()
     {
         $products = Product::all();
-        $cart = session()->get('cart', []);
+        $cart     = session()->get('cart', []);
 
         return view('cashier.index', compact('products', 'cart'));
     }
 
-    public function add($id)
+    public function add(Request $request, $id)
     {
         $product = Product::findOrFail($id);
-
-        $cart = session()->get('cart', []);
+        $cart    = session()->get('cart', []);
 
         $currentQty = isset($cart[$id]) ? $cart[$id]['qty'] : 0;
 
-        // 🔥 CEK STOK
         if ($product->stock <= $currentQty) {
             return redirect()->back()->with('error', 'Stok tidak cukup!');
         }
@@ -34,9 +33,9 @@ class CashierController extends Controller
             $cart[$id]['qty']++;
         } else {
             $cart[$id] = [
-                "name" => $product->name,
-                "price" => $product->price,
-                "qty" => 1
+                'name'  => $product->name,
+                'price' => $product->price,
+                'qty'   => 1,
             ];
         }
 
@@ -45,24 +44,22 @@ class CashierController extends Controller
         return redirect()->back();
     }
 
-    public function increase($id)
+    public function increase(Request $request, $id)
     {
-        $cart = session()->get('cart', []);
+        $cart    = session()->get('cart', []);
         $product = Product::find($id);
 
-        if (!$product) return back();
+        if (! $product) return back();
 
-        if (isset($cart[$id])) {
-            if ($product->stock > $cart[$id]['qty']) {
-                $cart[$id]['qty']++;
-            }
+        if (isset($cart[$id]) && $product->stock > $cart[$id]['qty']) {
+            $cart[$id]['qty']++;
         }
 
         session()->put('cart', $cart);
         return back();
     }
 
-    public function decrease($id)
+    public function decrease(Request $request, $id)
     {
         $cart = session()->get('cart', []);
 
@@ -78,9 +75,9 @@ class CashierController extends Controller
         return back();
     }
 
-    public function remove($id)
+    public function remove(Request $request, $id)
     {
-        $cart = session()->get('cart');
+        $cart = session()->get('cart', []);
 
         if (isset($cart[$id])) {
             unset($cart[$id]);
@@ -99,47 +96,43 @@ class CashierController extends Controller
         }
 
         $total = 0;
-
         foreach ($cart as $item) {
-            $total += (int)$item['price'] * (int)$item['qty'];
+            $total += (int) $item['price'] * (int) $item['qty'];
         }
 
-        // VALIDASI
         $request->validate([
-            'paid' => 'required|numeric|min:' . $total
+            'paid' => ['required', 'numeric', 'min:' . $total],
+        ], [
+            'paid.min' => 'Uang bayar kurang dari total harga.',
         ]);
 
-        // CEK STOK
+        // Re-check stock before committing
         foreach ($cart as $id => $item) {
             $product = Product::find($id);
-
-            if (!$product || $product->stock < $item['qty']) {
-                return redirect()->back()->with('error', 'Stok tidak cukup!');
+            if (! $product || $product->stock < $item['qty']) {
+                return redirect()->back()->with('error', 'Stok produk "' . ($product->name ?? $id) . '" tidak cukup!');
             }
         }
 
-        // 🔥 FIX KEMBALIAN (INI KUNCI)
-        $paid = (int) $request->input('paid');
-        $total = (int) $total;
+        $paid   = (int) $request->input('paid');
         $change = $paid - $total;
 
-        // SIMPAN TRANSAKSI
+        // Save transaction with cashier (user_id)
         $transaction = Transaction::create([
+            'user_id'     => Auth::id(),
             'total_price' => $total,
-            'paid' => $paid,
-            'change' => $change
+            'paid'        => $paid,
+            'change'      => $change,
         ]);
 
-        // DETAIL + KURANGI STOK
         foreach ($cart as $id => $item) {
-
             $product = Product::find($id);
 
             TransactionDetail::create([
                 'transaction_id' => $transaction->id,
-                'product_id' => $id,
-                'qty' => $item['qty'],
-                'price' => $item['price']
+                'product_id'     => $id,
+                'qty'            => $item['qty'],
+                'price'          => $item['price'],
             ]);
 
             $product->decrement('stock', $item['qty']);

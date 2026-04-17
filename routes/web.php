@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\StockInController;
+use App\Http\Controllers\CategoryController;
 
 // Redirect root ke dashboard
 Route::get('/', function () {
@@ -50,6 +51,8 @@ Route::middleware(['auth', 'role:admin|kasir'])->group(function () {
 
     // 📊 TRANSAKSI
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/transactions/export', [TransactionController::class, 'export'])
+    ->name('transactions.export');
     Route::get('/transactions/{id}', [TransactionController::class, 'show'])->name('transactions.show');
 
     // 📝 RECEIPT
@@ -57,10 +60,6 @@ Route::middleware(['auth', 'role:admin|kasir'])->group(function () {
         $transaction = \App\Models\Transaction::with('details.product')->findOrFail($id);
         return view('receipt', compact('transaction'));
     })->name('receipt');
-
-    // 📥 EXPORT
-    Route::get('/transactions/export', [TransactionController::class, 'export'])
-    ->name('transactions.export');
 });
 
 
@@ -86,6 +85,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     // 📦 STOK HABIS
     Route::get('/stok-habis', [ProductController::class, 'outOfStock'])->name('products.outofstock');
+
+    // 📦 KATEGORI
+    Route::resource('categories', CategoryController::class);
 });
 
 require __DIR__ . '/auth.php';

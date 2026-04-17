@@ -33,7 +33,9 @@
                             {{ $c->name }}
                         </option>
                     @endforeach
-
+                    <a href="/categories" class="text-sm text-blue-500 hover:underline">
+                        + Tambah Kategori
+                    </a>
                 </select>
 
                 <!-- HARGA -->

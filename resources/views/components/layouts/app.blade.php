@@ -40,7 +40,7 @@
                 @if(in_array($role, ['admin', 'kasir']))
                     <a href="/cashier"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg transition
-                                    {{ $current == 'cashier' ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                                        {{ $current == 'cashier' ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                         <i class="fa-solid fa-cash-register w-4"></i>
                         <span>Kasir</span>
                     </a>
@@ -50,17 +50,26 @@
                 @if(in_array($role, ['admin', 'kasir']))
                     <a href="/products"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg transition
-                                    {{ str_starts_with($current, 'products') ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                                        {{ str_starts_with($current, 'products') ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                         <i class="fa-solid fa-box w-4"></i>
                         <span>Produk</span>
                     </a>
+                @endif
+
+                <!-- KATEGORI (ADMIN ONLY) -->
+                @if($role === 'admin')
+                                <a href="/categories" class="flex items-center gap-3 px-3 py-2 rounded-lg transition
+                    {{ str_starts_with($current, 'categories') ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                                    <i class="fa-solid fa-tags w-4"></i>
+                                    <span>Kategori</span>
+                                </a>
                 @endif
 
                 <!-- TRANSAKSI (ADMIN + KASIR) -->
                 @if(in_array($role, ['admin', 'kasir']))
                     <a href="/transactions"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg transition
-                                    {{ str_starts_with($current, 'transactions') ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                                        {{ str_starts_with($current, 'transactions') ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                         <i class="fa-solid fa-receipt w-4"></i>
                         <span>Transaksi</span>
                     </a>
@@ -72,7 +81,7 @@
                     <!-- STOK MASUK -->
                     <a href="/stock-in"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg transition
-                                    {{ $current == 'stock-in' ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                                        {{ $current == 'stock-in' ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                         <i class="fa-solid fa-arrow-down w-4"></i>
                         <span>Stok Masuk</span>
                     </a>
@@ -80,7 +89,7 @@
                     <!-- STOK HABIS -->
                     <a href="/stok-habis"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg transition
-                                    {{ $current == 'stok-habis' ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                                        {{ $current == 'stok-habis' ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                         <i class="fa-solid fa-triangle-exclamation w-4"></i>
                         <span>Stok Habis</span>
                     </a>

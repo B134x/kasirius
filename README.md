@@ -1,168 +1,337 @@
-# 🧾 Kasir App (Mini POS System)
+# Kasirius POS
 
-Aplikasi kasir sederhana berbasis Laravel yang mendukung manajemen produk, transaksi penjualan, hingga pencetakan struk otomatis.
-
----
-
-## 🚀 Fitur Utama
-
-### 👨‍💼 Role System
-- Admin & Kasir
-- Pembatasan akses fitur berdasarkan role
-
-### 📦 Manajemen Produk
-- CRUD produk (Admin only)
-- Kategori produk
-- Pencarian & filter produk
-
-### 🛒 Sistem Kasir (POS)
-- Tambah produk ke keranjang
-- Update qty (+ / -)
-- Hapus item dari cart
-- Klik produk langsung masuk ke keranjang (UX cepat)
-
-### 💰 Transaksi
-- Perhitungan total otomatis
-- Input pembayaran
-- Hitung kembalian otomatis
-- Riwayat transaksi
-
-### 📊 Laporan
-- Export transaksi ke Excel
-- Filter:
-  - Harian
-  - Mingguan
-  - Bulanan
-  - Tahunan
-
-### 📦 Manajemen Stok
-- Stok masuk (Admin)
-- Deteksi stok habis
-- Validasi stok (tidak bisa minus)
-
-### 🧾 Struk
-- Cetak struk otomatis
-- Tampilan struk minimalis (printer ready)
-- QR Code (opsional untuk online receipt)
+Aplikasi web **Point of Sale (POS) + Inventori** berbasis Laravel. Dibuat untuk
+mengelola produk, kategori, stok masuk, transaksi penjualan, hingga pencetakan
+struk dan ekspor laporan ke Excel. Dibangun sebagai proyek mata kuliah di
+Politeknik Negeri Samarinda dengan pembagian peran berbasis pola **MVC**
+(Model–View–Controller).
 
 ---
 
-## 🎨 UI/UX
+## Daftar Isi
 
-- Tailwind CSS (clean & modern)
-- Tampilan berbeda untuk:
-  - Admin (full control)
-  - Kasir (simple & fokus transaksi)
-- Responsive layout
-
----
-
-## 🧠 Teknologi yang Digunakan
-
-- ⚙️ Laravel (MVC Framework)
-- 🧩 Blade Template Engine
-- 🎨 Tailwind CSS
-- 🗄️ MySQL Database
-- 🛒 Session-based Cart System
-- 📊 Laravel Excel (Export laporan)
+- [Fitur](#fitur)
+- [Tampilan & UI/UX](#tampilan--uiux)
+- [Teknologi yang Digunakan](#teknologi-yang-digunakan)
+- [Kebutuhan Sistem](#kebutuhan-sistem)
+- [Cara Mengambil & Menjalankan](#cara-mengambil--menjalankan)
+- [Akun & Role](#akun--role)
+- [Struktur Singkat Proyek](#struktur-singkat-proyek)
+- [Troubleshooting](#troubleshooting)
 
 ---
 
-## ⚙️ Cara Menjalankan Project
+## Fitur
 
-### 1. Clone Repository
-```
-git clone -b kasir1 https://github.com/B134x/kasirius.git
+### Autentikasi & Role
+- Login / register (menggunakan Laravel Breeze).
+- Dua peran pengguna: **Admin** dan **Kasir**.
+- Pembatasan akses per-halaman lewat middleware `role` (mis. `role:admin`,
+  `role:admin|kasir`).
+
+### Dashboard
+- Ringkasan penjualan hari ini, jumlah transaksi, jumlah produk, dan jumlah
+  produk stok habis.
+- Daftar transaksi terakhir dan daftar produk yang stoknya menipis.
+
+### Kasir (POS)
+- Grid produk dengan pencarian cepat (live search).
+- Keranjang berbasis sesi: tambah, tambah qty, kurangi qty, dan hapus item.
+- Pengecekan stok otomatis (tidak bisa menjual melebihi stok tersedia).
+- Checkout dengan input uang bayar dan perhitungan kembalian.
+- Proses checkout bersifat **atomik** (dibungkus database transaction) sehingga
+  stok dan transaksi tidak akan tersimpan setengah-setengah bila terjadi error.
+
+### Struk (Receipt)
+- Struk siap cetak bergaya thermal (auto-print saat dibuka).
+- Menyertakan **QR code** berisi ringkasan transaksi.
+- Mencatat nama kasir yang melakukan transaksi.
+
+### Manajemen Produk
+- CRUD produk (khusus Admin).
+- Pencarian dan filter berdasarkan kategori.
+- Pagination pada daftar produk.
+- Kasir dapat melihat daftar produk dan mengklik baris untuk menambahkannya ke
+  keranjang.
+
+### Kategori
+- Tambah dan hapus kategori produk (khusus Admin).
+
+### Stok Masuk (Stock In)
+- Pencatatan barang yang baru datang beserta supplier (khusus Admin).
+- Otomatis menambah stok produk terkait.
+
+### Transaksi & Laporan
+- Daftar riwayat transaksi (dengan pagination) dan halaman detail transaksi.
+- **Ekspor laporan ke Excel** (.xlsx) untuk rentang: Hari Ini, Minggu Ini,
+  Bulan Ini, Tahun Ini, dan rentang tanggal kustom.
+
+### Peringatan Stok
+- Halaman "Stok Habis / Menipis".
+- Ambang batas stok menipis dipusatkan di `config/inventory.php`.
+
+---
+
+## Tampilan & UI/UX
+
+- **Sidebar navigasi** dengan menu yang menyesuaikan role pengguna dan penanda
+  halaman aktif.
+- **Kartu statistik** pada dashboard untuk ringkasan angka penting.
+- **Tabel konsisten** di seluruh halaman: header abu-abu, baris dengan efek
+  hover, dan badge status (mis. "Habis" / "Menipis").
+- **Vokabulari tombol yang seragam**: tombol aksi utama (biru), tombol sekunder
+  / batal (outline), dan tombol semantik (hijau untuk "Bayar").
+- **Ikon** memakai FontAwesome (tanpa emoji).
+- **Pencarian**: debounce pada halaman produk, live filter pada halaman kasir.
+- **Struk ramah cetak** memanfaatkan aturan `@media print`.
+- **Notifikasi sukses/error** lewat flash message sesi.
+- **Layout responsif** menggunakan utility grid Tailwind.
+
+---
+
+## Teknologi yang Digunakan
+
+| Kategori        | Teknologi                                             |
+|-----------------|-------------------------------------------------------|
+| Framework       | Laravel 12 (PHP 8.2+)                                  |
+| Database        | MySQL                                                  |
+| Autentikasi     | Laravel Breeze                                         |
+| Frontend build  | Vite 7                                                 |
+| Styling         | Tailwind CSS 3                                         |
+| Interaktivitas  | Alpine.js                                              |
+| Ikon            | FontAwesome 6.5.1 (via CDN)                            |
+| Ekspor Excel    | maatwebsite/excel 3.1 (PhpSpreadsheet)                |
+| QR Code         | simplesoftwareio/simple-qrcode 4.2                    |
+
+Pola arsitektur: **MVC** (Model, View, Controller) — bawaan Laravel.
+
+---
+
+## Kebutuhan Sistem
+
+Pastikan terpasang di komputer:
+
+- **PHP 8.2 atau lebih baru**
+- **Composer** (manajer paket PHP)
+- **Node.js + npm** (untuk membangun aset frontend)
+- **MySQL** (mis. lewat XAMPP / Laragon)
+- **Ekstensi PHP yang wajib aktif:**
+  - `gd` — diperlukan oleh PhpSpreadsheet (ekspor Excel) dan simple-qrcode (QR).
+  - `zip` — diperlukan untuk membuat file `.xlsx`.
+  - `pdo_mysql`, `mbstring`, `openssl`, `fileinfo` — kebutuhan dasar Laravel.
+
+> **Penting:** Ekstensi `gd` sering kali masih nonaktif secara default. Jika
+> tidak diaktifkan, `composer install` akan gagal dan fitur Ekspor Excel serta
+> QR code tidak berjalan. Cara mengaktifkannya ada di bagian
+> [Troubleshooting](#troubleshooting).
+
+---
+
+## Cara Mengambil & Menjalankan
+
+Ikuti langkah berikut dari awal hingga aplikasi berjalan di browser.
+
+### 1. Ambil kode proyek
+
+Jika menggunakan Git:
+
+```bash
+git clone <url-repository> kasirius
 cd kasirius
 ```
-### 2. Install Dependency
-```
+
+Atau unduh ZIP-nya, lalu ekstrak dan masuk ke folder proyek.
+
+> **Catatan:** Jangan menyalin folder `vendor/` atau `node_modules/` dari
+> komputer lain. Keduanya harus dihasilkan ulang dengan `composer install` dan
+> `npm install` agar sesuai dengan versi paket pada proyek ini.
+
+### 2. Aktifkan ekstensi `gd` (jika belum)
+
+Lihat bagian [Troubleshooting](#troubleshooting). Lakukan ini **sebelum**
+`composer install`.
+
+### 3. Pasang dependensi PHP
+
+```bash
 composer install
-npm install
 ```
-### 3. Setup Environment
-```
+
+### 4. Siapkan file environment
+
+```bash
+# Windows (Command Prompt)
+copy .env.example .env
+
+# Linux / macOS
 cp .env.example .env
-php artisan key:generate
 ```
-### 4. Konfigurasi Database
-```
-DB_DATABASE=nama_database
+
+Lalu buka `.env` dan sesuaikan konfigurasi database:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=kasirius_db
 DB_USERNAME=root
 DB_PASSWORD=
 ```
-### 5. Migrasi Database
+
+### 5. Buat application key
+
+```bash
+php artisan key:generate
 ```
+
+### 6. Buat database
+
+Buat database kosong bernama **`kasirius_db`** (sesuai `DB_DATABASE` di `.env`),
+misalnya lewat phpMyAdmin atau terminal MySQL:
+
+```sql
+CREATE DATABASE kasirius_db;
+```
+
+### 7. Jalankan migrasi (dan seeder bila perlu)
+
+```bash
 php artisan migrate
 ```
-### 6. Jalankan Aplikasi
+
+Untuk mengisi data awal (membuat satu user default):
+
+```bash
+php artisan migrate --seed
 ```
+
+### 8. Pasang dependensi frontend & bangun aset
+
+```bash
+npm install
+npm run build
+```
+
+> Saat aktif mengembangkan tampilan, jalankan `npm run dev` (bukan `build`) agar
+> perubahan CSS/JS langsung ter-compile.
+
+### 9. Jalankan server
+
+```bash
 php artisan serve
-npm run dev
 ```
-### Akses di:
+
+Buka browser ke alamat yang ditampilkan, biasanya:
+
 ```
 http://127.0.0.1:8000
 ```
 
+Selesai. Aplikasi siap digunakan.
 
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+---
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Akun & Role
 
-## About Laravel
+- Aplikasi memiliki dua role: **admin** dan **kasir**.
+- Secara default, kolom `role` pada tabel users bernilai **`kasir`**.
+- Untuk membuat akun **admin**, daftar lewat halaman register lalu ubah nilai
+  `role` menjadi `admin` langsung di database, atau lewat Tinker:
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+```bash
+php artisan tinker
+```
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+```php
+$u = App\Models\User::where('email', 'emailanda@contoh.com')->first();
+$u->role = 'admin';
+$u->save();
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Perbedaan hak akses:
 
-## Learning Laravel
+| Fitur                          | Admin | Kasir |
+|--------------------------------|:-----:|:-----:|
+| Dashboard                      |  Ya   |  Ya   |
+| Kasir & Checkout               |  Ya   |  Ya   |
+| Lihat Produk                   |  Ya   |  Ya   |
+| Tambah/Edit/Hapus Produk       |  Ya   |  -    |
+| Kategori                       |  Ya   |  -    |
+| Stok Masuk                     |  Ya   |  -    |
+| Stok Habis                     |  Ya   |  -    |
+| Transaksi & Ekspor Excel       |  Ya   |  Ya   |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Struktur Singkat Proyek
 
-## Laravel Sponsors
+```
+app/
+  Http/Controllers/   Controller (logika request/response)
+  Http/Middleware/    RoleMiddleware (pembatasan akses per-role)
+  Models/             Model Eloquent (Product, Category, Transaction, dst.)
+  Exports/            TransactionExport (definisi ekspor Excel)
+config/
+  inventory.php       Ambang batas stok menipis
+database/
+  migrations/         Definisi struktur tabel
+  seeders/            Data awal
+resources/
+  views/              Tampilan Blade (View)
+  css/ js/            Sumber aset frontend
+routes/
+  web.php             Definisi route aplikasi
+  auth.php            Route autentikasi (Breeze)
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## Troubleshooting
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### `composer install` gagal: `ext-gd is missing`
 
-## Contributing
+PhpSpreadsheet dan simple-qrcode membutuhkan ekstensi `gd`. Aktifkan dengan:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+1. Cari lokasi file `php.ini` yang dipakai:
+   ```bash
+   php --ini
+   ```
+2. Buka `php.ini` tersebut, cari baris:
+   ```ini
+   ;extension=gd
+   ```
+3. Hapus tanda titik koma (`;`) di depannya sehingga menjadi:
+   ```ini
+   extension=gd
+   ```
+4. Simpan, lalu verifikasi:
+   ```bash
+   php -m
+   ```
+   Pastikan `gd` muncul di daftar. Jika menjalankan lewat Apache (XAMPP),
+   **restart Apache** agar perubahan terbaca.
+5. Ulangi `composer install`.
 
-## Code of Conduct
+### Tampilan berantakan / CSS tidak muncul
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Aset frontend belum dibangun. Jalankan:
 
-## Security Vulnerabilities
+```bash
+npm install
+npm run build
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Error koneksi database
 
-## License
+- Pastikan layanan **MySQL sudah berjalan** (mis. dari panel XAMPP/Laragon).
+- Pastikan database `kasirius_db` sudah dibuat.
+- Pastikan kredensial di `.env` sesuai, lalu jalankan:
+  ```bash
+  php artisan config:clear
+  ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Halaman selalu 403 (Akses ditolak)
 
+Akun yang dipakai kemungkinan berperan `kasir` sementara halaman tersebut khusus
+`admin`. Ubah role akun menjadi `admin` (lihat bagian
+[Akun & Role](#akun--role)).

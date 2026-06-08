@@ -2,12 +2,12 @@
 
     <div class="p-6 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
 
-        <!-- 🔥 PRODUK -->
+        <!-- PRODUK -->
         <div class="md:col-span-2">
 
             <!-- SEARCH -->
             <div class="mb-4">
-                <input type="text" id="searchProduct" placeholder="🔍 Cari produk..."
+                <input type="text" id="searchProduct" placeholder="Cari produk..."
                     class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200">
             </div>
 
@@ -27,10 +27,13 @@
                             Stok: {{ $p->stock }}
                         </p>
 
-                        <a href="{{ route('cart.add', $p->id) }}"
-                            class="mt-3 block text-center bg-blue-500 hover:bg-blue-600 text-white py-1 rounded-lg text-sm transition">
-                            + Tambah
-                        </a>
+                        <form action="{{ route('cart.add', $p->id) }}" method="POST" class="mt-3">
+                            @csrf
+                            <button type="submit"
+                                class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white py-1 rounded-lg text-sm transition">
+                                + Tambah
+                            </button>
+                        </form>
 
                     </div>
                 @endforeach
@@ -39,7 +42,7 @@
 
         </div>
 
-        <!-- 🔥 KERANJANG -->
+        <!-- KERANJANG -->
         <div class="bg-white p-4 rounded-xl shadow-sm border h-fit">
 
             <h2 class="text-lg font-semibold mb-4">Keranjang</h2>
@@ -55,13 +58,21 @@
                     <div>
                         <p class="text-sm">{{ $item['name'] }}</p>
 
-                        <div class="flex gap-2 mt-1">
+                        <div class="flex gap-2 mt-1 items-center">
 
-                            <a href="{{ route('cart.decrease', $id) }}" class="px-2 bg-gray-200 rounded">-</a>
+                            <form action="{{ route('cart.decrease', $id) }}" method="POST">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="px-2 bg-gray-200 rounded">-</button>
+                            </form>
 
                             <span>{{ $item['qty'] }}</span>
 
-                            <a href="{{ route('cart.increase', $id) }}" class="px-2 bg-gray-200 rounded">+</a>
+                            <form action="{{ route('cart.increase', $id) }}" method="POST">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="px-2 bg-gray-200 rounded">+</button>
+                            </form>
 
                         </div>
 

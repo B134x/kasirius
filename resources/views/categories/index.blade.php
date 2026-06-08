@@ -5,11 +5,11 @@
         <h1 class="text-xl font-semibold mb-4">Kategori Produk</h1>
 
         <!-- FORM TAMBAH -->
-        <form method="POST" class="flex gap-2 mb-6">
+        <form method="POST" action="{{ route('categories.store') }}" class="flex gap-2 mb-6">
             @csrf
             <input type="text" name="name" placeholder="Nama kategori..." class="border rounded-lg px-3 py-2 w-full">
 
-            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg">
+            <button class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
                 Tambah
             </button>
         </form>

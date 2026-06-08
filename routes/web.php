@@ -36,28 +36,30 @@ Route::middleware(['auth'])->group(function () {
 */
 Route::middleware(['auth', 'role:admin|kasir'])->group(function () {
 
-    // 💰 KASIR
+    // KASIR
     Route::get('/cashier', [CashierController::class, 'index'])->name('cashier');
 
-    Route::get('/cart/add/{id}', [CashierController::class, 'add'])->name('cart.add');
-    Route::get('/cart/increase/{id}', [CashierController::class, 'increase'])->name('cart.increase');
-    Route::get('/cart/decrease/{id}', [CashierController::class, 'decrease'])->name('cart.decrease');
-    Route::get('/cart/remove/{id}', [CashierController::class, 'remove'])->name('cart.remove');
+    // Mutasi keranjang pakai verb HTTP yang sesuai (bukan GET) supaya aman:
+    // GET seharusnya tidak mengubah state (prefetch/crawler bisa tak sengaja ubah cart).
+    Route::post('/cart/add/{id}', [CashierController::class, 'add'])->name('cart.add');
+    Route::patch('/cart/increase/{id}', [CashierController::class, 'increase'])->name('cart.increase');
+    Route::patch('/cart/decrease/{id}', [CashierController::class, 'decrease'])->name('cart.decrease');
+    Route::delete('/cart/remove/{id}', [CashierController::class, 'remove'])->name('cart.remove');
 
     Route::post('/checkout', [CashierController::class, 'checkout'])->name('checkout');
 
-    // 📦 PRODUK (READ ONLY)
+    // PRODUK (READ ONLY)
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 
-    // 📊 TRANSAKSI
+    // TRANSAKSI
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::get('/transactions/export', [TransactionController::class, 'export'])
     ->name('transactions.export');
     Route::get('/transactions/{id}', [TransactionController::class, 'show'])->name('transactions.show');
 
-    // 📝 RECEIPT
+    // RECEIPT
     Route::get('/receipt/{id}', function ($id) {
-        $transaction = \App\Models\Transaction::with('details.product')->findOrFail($id);
+        $transaction = \App\Models\Transaction::with('details.product', 'user')->findOrFail($id);
         return view('receipt', compact('transaction'));
     })->name('receipt');
 });
@@ -70,7 +72,7 @@ Route::middleware(['auth', 'role:admin|kasir'])->group(function () {
 */
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
-    // 📦 PRODUK
+    // PRODUK
     Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
 
@@ -79,15 +81,17 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 
-    // 📥 STOCK IN
+    // STOCK IN
     Route::get('/stock-in', [StockInController::class, 'index'])->name('stockin');
     Route::post('/stock-in', [StockInController::class, 'store'])->name('stockin.store');
 
-    // 📦 STOK HABIS
+    // STOK HABIS
     Route::get('/stok-habis', [ProductController::class, 'outOfStock'])->name('products.outofstock');
 
-    // 📦 KATEGORI
-    Route::resource('categories', CategoryController::class);
+    // KATEGORI
+    // Batasi ke aksi yang benar-benar diimplementasikan di controller.
+    // Tanpa ->only(), resource membuat route create/show/edit/update yang akan error kalau diakses.
+    Route::resource('categories', CategoryController::class)->only(['index', 'store', 'destroy']);
 });
 
 require __DIR__ . '/auth.php';

@@ -49,12 +49,13 @@
 
                 </div>
 
-                <button class="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition">
+                <button
+                    class="mt-4 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
                     Simpan
                 </button>
 
                 <a href="{{ url()->current() }}"
-                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg">
+                    class="mt-4 inline-block border border-gray-300 text-gray-600 hover:bg-gray-50 text-sm font-medium px-4 py-2 rounded-lg transition">
                     Batal
                 </a>
 
@@ -121,6 +122,11 @@
                 </tbody>
 
             </table>
+
+            <!-- PAGINATION -->
+            <div class="p-4 border-t">
+                {{ $stockIns->withQueryString()->links() }}
+            </div>
 
         </div>
 

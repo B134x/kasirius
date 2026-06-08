@@ -33,10 +33,12 @@
                             {{ $c->name }}
                         </option>
                     @endforeach
-                    <a href="/categories" class="text-sm text-blue-500 hover:underline">
-                        + Tambah Kategori
-                    </a>
                 </select>
+
+                {{-- Link bantu dipindah ke luar <select> (link di dalam select itu HTML tidak valid) --}}
+                <a href="{{ route('categories.index') }}" class="inline-block mt-1 text-sm text-blue-500 hover:underline">
+                    + Tambah Kategori
+                </a>
 
                 <!-- HARGA -->
                 <div class="mb-4">
@@ -57,11 +59,13 @@
                 <!-- BUTTON -->
                 <div class="flex justify-end gap-2">
 
-                    <a href="/products" class="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-100">
+                    <a href="/products"
+                        class="border border-gray-300 text-gray-600 hover:bg-gray-50 text-sm font-medium px-4 py-2 rounded-lg transition">
                         Batal
                     </a>
 
-                    <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                    <button
+                        class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
                         Simpan
                     </button>
 

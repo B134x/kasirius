@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
@@ -25,7 +26,7 @@ class CashierController extends Controller
 
         $currentQty = isset($cart[$id]) ? $cart[$id]['qty'] : 0;
 
-        // 🔥 CEK STOK
+        // CEK STOK
         if ($product->stock <= $currentQty) {
             return redirect()->back()->with('error', 'Stok tidak cukup!');
         }
@@ -109,40 +110,50 @@ class CashierController extends Controller
             'paid' => 'required|numeric|min:' . $total
         ]);
 
-        // CEK STOK
-        foreach ($cart as $id => $item) {
-            $product = Product::find($id);
-
-            if (!$product || $product->stock < $item['qty']) {
-                return redirect()->back()->with('error', 'Stok tidak cukup!');
-            }
-        }
-
-        // 🔥 FIX KEMBALIAN (INI KUNCI)
+        // HITUNG KEMBALIAN
         $paid = (int) $request->input('paid');
         $total = (int) $total;
         $change = $paid - $total;
 
-        // SIMPAN TRANSAKSI
-        $transaction = Transaction::create([
-            'total_price' => $total,
-            'paid' => $paid,
-            'change' => $change
-        ]);
+        try {
+            // Bungkus seluruh proses checkout dalam satu DB transaction supaya ATOMIK:
+            // kalau ada satu langkah gagal (mis. stok kurang), semuanya di-rollback.
+            // Jadi tidak akan ada transaksi tersimpan tapi stok terpotong sebagian.
+            $transaction = DB::transaction(function () use ($cart, $total, $paid, $change, $request) {
 
-        // DETAIL + KURANGI STOK
-        foreach ($cart as $id => $item) {
+                $transaction = Transaction::create([
+                    'user_id' => $request->user()->id, // catat kasir yang melakukan transaksi
+                    'total_price' => $total,
+                    'paid' => $paid,
+                    'change' => $change
+                ]);
 
-            $product = Product::find($id);
+                foreach ($cart as $id => $item) {
 
-            TransactionDetail::create([
-                'transaction_id' => $transaction->id,
-                'product_id' => $id,
-                'qty' => $item['qty'],
-                'price' => $item['price']
-            ]);
+                    // lockForUpdate mengunci baris produk sampai transaksi selesai,
+                    // mencegah dua checkout bersamaan menjual stok yang sama (oversell).
+                    $product = Product::lockForUpdate()->find($id);
 
-            $product->decrement('stock', $item['qty']);
+                    if (!$product || $product->stock < $item['qty']) {
+                        // Exception di dalam DB::transaction otomatis memicu rollback
+                        throw new \RuntimeException('Stok tidak cukup untuk ' . ($product->name ?? 'produk'));
+                    }
+
+                    TransactionDetail::create([
+                        'transaction_id' => $transaction->id,
+                        'product_id' => $id,
+                        'qty' => $item['qty'],
+                        'price' => $item['price']
+                    ]);
+
+                    $product->decrement('stock', $item['qty']);
+                }
+
+                return $transaction;
+            });
+        } catch (\RuntimeException $e) {
+            // Stok tidak cukup -> kembali ke kasir dengan pesan error, keranjang dibiarkan utuh
+            return redirect()->back()->with('error', $e->getMessage());
         }
 
         session()->forget('cart');

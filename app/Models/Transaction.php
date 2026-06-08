@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Transaction extends Model
 {
     protected $fillable = [
+    'user_id',
     'total_price',
     'paid',
     'change'
@@ -15,6 +16,12 @@ class Transaction extends Model
 public function details()
 {
     return $this->hasMany(\App\Models\TransactionDetail::class);
+}
+
+// Kasir yang melakukan transaksi
+public function user()
+{
+    return $this->belongsTo(\App\Models\User::class);
 }
 
 }

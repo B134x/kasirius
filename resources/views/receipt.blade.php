@@ -35,7 +35,7 @@
             font-weight: bold;
         }
 
-        /* 🔥 biar tombol ga ikut ke-print */
+        /* biar tombol ga ikut ke-print */
         @media print {
             .no-print {
                 display: none;
@@ -64,7 +64,7 @@
 
         <p class="small" style="margin: 2px 0;">
             TRX{{ str_pad($transaction->id, 3, '0', STR_PAD_LEFT) }}<br>
-            Kasir: {{ auth()->user()->name }}<br>
+            Kasir: {{ $transaction->user->name ?? auth()->user()->name }}<br>
             {{ now()->format('d/m/Y H:i') }}
         </p>
     </div>
@@ -105,7 +105,7 @@
 
     <!-- FOOTER -->
     <div class="center small">
-        Terima kasih 🙏<br>
+        Terima kasih<br>
         Barang yang sudah dibeli<br>
         tidak dapat dikembalikan
     </div>
@@ -121,7 +121,7 @@
 
     <!-- BUTTON (GA KE-PRINT) -->
     <a href="/cashier" class="btn no-print">
-        ← Kembali ke Kasir
+        Kembali ke Kasir
     </a>
 
 </body>

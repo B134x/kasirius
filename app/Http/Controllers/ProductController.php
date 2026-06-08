@@ -99,8 +99,9 @@ class ProductController extends Controller
             abort(403);
         }
 
-        $products = Product::where('stock', '<=', 0)
-            ->orWhere('stock', '<=', 5)
+        // stok habis (0) atau menipis (<= ambang). Pakai satu kondisi:
+        // '<= 0 OR <= 5' itu redundan, '<= ambang' sudah mencakup keduanya.
+        $products = Product::where('stock', '<=', config('inventory.low_stock_threshold'))
             ->orderBy('stock', 'asc')
             ->get();
 

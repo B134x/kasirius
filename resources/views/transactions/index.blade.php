@@ -8,34 +8,45 @@
             <p class="text-sm text-gray-500">Daftar semua transaksi yang telah dilakukan</p>
         </div>
 
-        <div class="flex gap-2 mb-4 flex-wrap">
+        <div class="flex gap-2 mb-3 flex-wrap">
 
             <a href="{{ route('transactions.export', ['type' => 'today']) }}"
-                class="bg-green-500 text-white px-3 py-2 rounded-lg text-sm">
+                class="inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 px-3 py-2 rounded-lg text-sm font-medium transition">
+                <i class="fa-solid fa-file-excel"></i>
                 Hari Ini
             </a>
 
             <a href="{{ route('transactions.export', ['type' => 'week']) }}"
-                class="bg-blue-500 text-white px-3 py-2 rounded-lg text-sm">
+                class="inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 px-3 py-2 rounded-lg text-sm font-medium transition">
+                <i class="fa-solid fa-file-excel"></i>
                 Minggu Ini
             </a>
 
             <a href="{{ route('transactions.export', ['type' => 'month']) }}"
-                class="bg-yellow-500 text-white px-3 py-2 rounded-lg text-sm">
+                class="inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 px-3 py-2 rounded-lg text-sm font-medium transition">
+                <i class="fa-solid fa-file-excel"></i>
                 Bulan Ini
             </a>
 
             <a href="{{ route('transactions.export', ['type' => 'year']) }}"
-                class="bg-purple-500 text-white px-3 py-2 rounded-lg text-sm">
+                class="inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 px-3 py-2 rounded-lg text-sm font-medium transition">
+                <i class="fa-solid fa-file-excel"></i>
                 Tahun Ini
             </a>
 
         </div>
-        <form action="{{ route('transactions.export') }}" method="GET" class="flex gap-2 mt-3">
-            <input type="date" name="from" class="border px-2 py-1 rounded">
-            <input type="date" name="to" class="border px-2 py-1 rounded">
 
-            <button class="bg-black text-white px-3 py-1 rounded">
+        <form action="{{ route('transactions.export') }}" method="GET" class="flex gap-2 mb-6 flex-wrap items-center">
+            {{-- Tandai sebagai export rentang khusus + samakan nama field dengan controller --}}
+            <input type="hidden" name="type" value="custom">
+            <input type="date" name="start_date" required
+                class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200">
+            <input type="date" name="end_date" required
+                class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200">
+
+            <button
+                class="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                <i class="fa-solid fa-file-excel"></i>
                 Export Custom
             </button>
         </form>
@@ -97,6 +108,11 @@
                 </tbody>
 
             </table>
+
+            <!-- PAGINATION -->
+            <div class="p-4 border-t">
+                {{ $transactions->withQueryString()->links() }}
+            </div>
 
         </div>
 

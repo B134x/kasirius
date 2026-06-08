@@ -25,7 +25,8 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        $lowStockProducts = Product::where('stock', '<=', 10)
+        // ambang stok menipis dipusatkan di config/inventory.php
+        $lowStockProducts = Product::where('stock', '<=', config('inventory.low_stock_threshold'))
             ->orderBy('stock', 'asc')
             ->take(5)
             ->get();

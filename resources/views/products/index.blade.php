@@ -37,7 +37,7 @@
         <form method="GET" id="filterForm" class="mb-6 flex flex-col md:flex-row gap-3">
 
             <!-- SEARCH -->
-            <input type="text" id="searchInput" name="search" placeholder="🔍 Scan / cari barang..."
+            <input type="text" id="searchInput" name="search" placeholder="Scan / cari barang..."
                 value="{{ request('search') }}"
                 class="border rounded-lg px-4 py-3 w-full text-sm focus:ring-2 focus:ring-blue-300">
 
@@ -77,11 +77,18 @@
                     @forelse ($products as $p)
                         <tr class="border-t hover:bg-gray-50 transition duration-200
                                 {{ $role === 'kasir' ? 'cursor-pointer' : '' }}" @if($role === 'kasir')
-                                onclick="window.location='{{ route('cart.add', $p->id) }}'" @endif>
+                                onclick="document.getElementById('add-{{ $p->id }}').submit()" @endif>
 
                             <!-- NAMA -->
                             <td class="px-4 py-3 font-medium">
                                 {{ $p->name }}
+
+                                {{-- Form tersembunyi: klik baris (kasir) submit POST ke cart.add --}}
+                                @if($role === 'kasir')
+                                    <form id="add-{{ $p->id }}" action="{{ route('cart.add', $p->id) }}" method="POST" class="hidden">
+                                        @csrf
+                                    </form>
+                                @endif
                             </td>
 
                             <!-- KATEGORI -->
@@ -102,7 +109,7 @@
                                     <span class="bg-red-100 text-red-600 px-2 py-1 rounded text-xs font-semibold">
                                         Habis
                                     </span>
-                                @elseif($p->stock <= 5)
+                                @elseif($p->stock <= config('inventory.low_stock_threshold'))
                                     <span class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded text-xs font-semibold">
                                         {{ $p->stock }}
                                     </span>
@@ -160,7 +167,7 @@
 
     </div>
 
-    <!-- 🔥 DEBOUNCE SEARCH FIX -->
+    <!-- DEBOUNCE SEARCH -->
     <script>
         let timeout = null;
         const input = document.getElementById('searchInput');

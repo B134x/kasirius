@@ -11,7 +11,8 @@ class StockInController extends Controller
     public function index()
     {
         $products = Product::all();
-        $stockIns = StockIn::latest()->get();
+        // eager load product untuk hindari N+1, dan paginate biar tidak load semua
+        $stockIns = StockIn::with('product')->latest()->paginate(15);
 
         return view('stockin.index', compact('products', 'stockIns'));
     }

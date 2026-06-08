@@ -12,7 +12,8 @@ class TransactionController extends Controller
 {
     public function index()
     {
-        $transactions = Transaction::latest()->get();
+        // paginate, bukan get(): jangan load semua transaksi sekaligus
+        $transactions = Transaction::latest()->paginate(15);
         return view('transactions.index', compact('transactions'));
     }
 
@@ -40,9 +41,17 @@ class TransactionController extends Controller
         } elseif ($type == 'year') {
             $query->whereYear('created_at', Carbon::now()->year);
         } elseif ($type == 'custom') {
+            // Pastikan kedua tanggal diisi dan rentangnya valid
+            $request->validate([
+                'start_date' => 'required|date',
+                'end_date'   => 'required|date|after_or_equal:start_date',
+            ]);
+
+            // startOfDay/endOfDay supaya transaksi di tanggal akhir ikut terhitung
+            // (tanpa ini, '2026-06-09' dianggap jam 00:00:00 dan isinya kebuang)
             $query->whereBetween('created_at', [
-                $request->start_date,
-                $request->end_date
+                Carbon::parse($request->start_date)->startOfDay(),
+                Carbon::parse($request->end_date)->endOfDay(),
             ]);
         }
 
